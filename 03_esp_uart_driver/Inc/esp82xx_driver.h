@@ -9,5 +9,6 @@
 
 void debug_uart_init(void);
 void debug_uart_write(int ch);
+void esp_uart_init(void);
 
 #endif /* ESP82XX_DRIVER_H_ */

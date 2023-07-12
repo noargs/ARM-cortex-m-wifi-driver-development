@@ -2,9 +2,13 @@
 
 #define GPIOAEN                   (1U << 0)
 #define USART2EN                  (1U << 17)
+#define USART1EN                  (1U << 4)
+
 #define CR1_UE                    (1U << 13)
 #define SYS_FREQ                  16000000
 #define APB1_CLK                  SYS_FREQ
+#define APB2_CLK                  SYS_FREQ
+
 #define UART_BAUDRATE             115200
 #define CR1_TE                    (1U << 3)
 #define CR1_RE                    (1U << 2)
@@ -66,6 +70,74 @@ void debug_uart_init(void)
 
   //6. Enable the UART module
   USART2->CR1 |= CR1_UE;
+}
+
+/* Pinout:
+ * UART Module      :   UART1
+ * UART Pins        :   PA9 = TX, PA10 = RX
+ *
+ * ESP pin              STM32F4 pin
+ * -----------------------------------
+ * ESP82xx RS pin   :   PA8
+ * ESP82xx EN pin   :   3.3v
+ * ESP82xx IO1 pin  :   3.3v
+ * ESP82xx IO2 pin  :   3.3v
+ * ESP82xx VCC pin  :   3.3v
+ * ESP82xx GND pin  :   GND
+ * ESP82xx TX pin   :   PA10 (RX)
+ * ESP82xx RX pin   :   PA9 (TX)
+ *
+ */
+void esp_uart_init(void)
+{
+  // Enable clock access to GPIOA
+  RCC->AHB1ENR |= GPIOAEN;
+
+  // Set PA9 and PA10 modes to Alternate Function
+
+  //PA9
+  GPIOA->MODER &= ~(1U << 18);
+  GPIOA->MODER |= (1U << 19);
+
+  //PA10
+  GPIOA->MODER &= ~(1U << 20);
+  GPIOA->MODER |= (1U << 21);
+
+  //4. PA9 Alternate function type to USART1_TX (0b0111:AF07 |= AFRH9[7:4]) [RM page: 162]
+  // GPIOx_AFRH register
+  GPIOA->AFR[1] |= (1U << 4);
+  GPIOA->AFR[1] |= (1U << 5);
+  GPIOA->AFR[1] |= (1U << 6);
+  GPIOA->AFR[1] &= ~(1U << 7);
+
+  //5. PA10 Alternate function type to USART1_RX (0b0111:AF07 |= AFRH10[11:8]) [RM page: 162]
+  // GPIOx_AFRH register
+  GPIOA->AFR[1] |= (1U << 8);
+  GPIOA->AFR[1] |= (1U << 9);
+  GPIOA->AFR[1] |= (1U << 10);
+  GPIOA->AFR[1] &= ~(1U << 11);
+
+
+  //                  [ Configure UART module ]
+
+  //1. Enable clock access to UART module (0b1 |= USART2EN[BIT17]) [RM page: 119]
+  RCC->APB2ENR |= USART1EN;
+
+  //2. Disable UART module, USART_CR1
+  USART1->CR1 &= ~CR1_UE;
+
+  //3. Set UART Baud rate
+  USART1->BRR = compute_uart_bd(APB2_CLK, UART_BAUDRATE);
+
+  //4. Set tranfer direction, want either or both Tx and Rx
+  USART1->CR1 = CR1_TE | CR1_RE;
+
+  //5. Enable UART2 interrupt in NVIC
+  NVIC_EnableIRQ(USART1_IRQn);
+
+  //6. Enable the UART module
+  USART1->CR1 |= CR1_UE;
+
 }
 
 void debug_uart_write(int ch)
