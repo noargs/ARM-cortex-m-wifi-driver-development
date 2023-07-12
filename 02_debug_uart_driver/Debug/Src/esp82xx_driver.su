@@ -1,0 +1,4 @@
+../Src/esp82xx_driver.c:14:5:__io_putchar	16	static
+../Src/esp82xx_driver.c:23:6:debug_uart_init	8	static
+../Src/esp82xx_driver.c:71:6:debug_uart_write	16	static
+../Src/esp82xx_driver.c:80:17:compute_uart_bd	16	static
