@@ -5,13 +5,19 @@
 #define USART1EN                  (1U << 4)
 
 #define CR1_UE                    (1U << 13)
-#define SYS_FREQ                  16000000
+#define SYS_FREQ                  16000000U       // ==> 1 sec
 #define APB1_CLK                  SYS_FREQ
 #define APB2_CLK                  SYS_FREQ
 
 #define UART_BAUDRATE             115200
 #define CR1_TE                    (1U << 3)
 #define CR1_RE                    (1U << 2)
+
+#define SYSTICK_LOAD_VAL          (SYS_FREQ/1000U) // 16000 ==> 1 milliseconds
+#define CTRL_ENABLE               (1U << 0)       // SYST_CSR [GUM page: 249], enable the counter
+#define CTRL_CLKSRC               (1U << 2)       // ...,  0=external clock, 1=processor clock
+#define CTRL_COUNTFLAG            (1U << 16)      // ..., returns 1 if timer counted to 0 since last time was read
+
 
 static uint16_t compute_uart_bd(uint32_t pclk, uint32_t desired_baud);
 
@@ -147,6 +153,33 @@ void debug_uart_write(int ch)
 
   // write to transmit data register
   USART2->DR = (ch & 0xFF);
+}
+
+void systick_delay_ms(uint32_t delay)
+{
+  // Systick Register names in header file are different
+  // SysTick->LOAD corresponse to `SysTick Reload Value Register` [SYST_RVR]
+  // SysTick->VAL    ==>   `SysTick Current Value Register` [SYST_CVR]
+  // SysTick->CTRL   ==>   `SysTick Control and Status Register` [SYST_CSR]
+
+  // 1. Reload with number of clocks per milliseconds [SYST_RVR] [GUM page: 249]
+  SysTick->LOAD = SYSTICK_LOAD_VAL - 1; // for 16000 clock pulses, set RELOAD 15999 (i.e. N-1)
+
+  // 2. Clear `Systick current value register` [SYST_CVR] [GUM page: 249]
+  SysTick->VAL = 0;
+
+  // 3. Enable systick and select internal clock source [SYST_CSR] [GUM page: 249]
+  SysTick->CTRL = CTRL_CLKSRC | CTRL_ENABLE;
+
+  // if delay=5ms; i=0 then i++ every 1ms
+  for (int i=0; i < delay; i++)
+  {
+    // Wait until COUNTFLAG is set = 1
+    // no set = 0, timeout has not occured
+    while((SysTick->CTRL & CTRL_COUNTFLAG) == 0){}
+  }
+
+  SysTick->CTRL = 0;
 }
 
 static uint16_t compute_uart_bd(uint32_t pclk, uint32_t desired_baud)

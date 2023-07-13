@@ -8,6 +8,7 @@ int main()
 
   while(1)
   {
-    printf("Hello from Debug UART \n\r");
+    printf("A second just past. \n\r");
+    systick_delay_ms(1000);
   }
 }
