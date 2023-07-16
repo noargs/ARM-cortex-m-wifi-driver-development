@@ -1,4 +1,5 @@
 "./Src/esp82xx_driver.o"
+"./Src/fifo.o"
 "./Src/main.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"
