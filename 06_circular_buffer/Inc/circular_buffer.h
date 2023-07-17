@@ -1,0 +1,6 @@
+#ifndef CIRCULAR_BUFFER_H_
+#define CIRCULAR_BUFFER_H_
+
+
+
+#endif /* CIRCULAR_BUFFER_H_ */

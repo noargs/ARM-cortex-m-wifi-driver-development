@@ -1,4 +1,6 @@
-../Src/esp82xx_driver.c:14:5:__io_putchar	16	static
-../Src/esp82xx_driver.c:23:6:debug_uart_init	8	static
-../Src/esp82xx_driver.c:71:6:debug_uart_write	16	static
-../Src/esp82xx_driver.c:80:17:compute_uart_bd	16	static
+/Users/nahl/dev/c/embedded/Embedded-wifi-development-stm32f411-esp8266/F4_headers/CMSIS/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
+../Src/esp82xx_driver.c:18:5:__io_putchar	16	static
+../Src/esp82xx_driver.c:27:6:debug_uart_init	8	static
+../Src/esp82xx_driver.c:91:6:esp_uart_init	8	static
+../Src/esp82xx_driver.c:143:6:debug_uart_write	16	static
+../Src/esp82xx_driver.c:152:17:compute_uart_bd	16	static
