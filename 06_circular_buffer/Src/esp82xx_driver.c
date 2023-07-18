@@ -73,6 +73,7 @@ void debug_uart_init(void)
   USART2->CR1 = CR1_TE | CR1_RE;
 
   //5. Enable UART2 interrupt in NVIC
+  NVIC_EnableIRQ(USART2_IRQn);
 
   //6. Enable the UART module
   USART2->CR1 |= CR1_UE;
