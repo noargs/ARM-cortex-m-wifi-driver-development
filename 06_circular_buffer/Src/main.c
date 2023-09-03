@@ -4,17 +4,32 @@
 #include "fifo.h"
 #include "circular_buffer.h"
 
-int result;
+
+extern portType debug_port;
 
 int main()
 {
-  char main_str[] = "Homework";
-  char str_to_find[] = "Home";
 
-  result = find_string(str_to_find, main_str);
-  while(1)
-  {
+	 /*Initialize debug uart*/
+   debug_uart_init();
 
-  }
+   /*Initialize circular buffer*/
+   circular_buffer_init();
 
+   /*Send string*/
+   buffer_send_string("Hello from DEBUG UART ...\n\r",debug_port);
+
+
+	while(1);
+}
+
+void USART1_IRQHandler(void)
+{
+	esp82_uart_callback();
+}
+
+
+void USART2_IRQHandler(void)
+{
+	debug_uart_callback();
 }
