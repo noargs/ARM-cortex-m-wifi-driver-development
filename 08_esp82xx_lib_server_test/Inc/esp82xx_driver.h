@@ -11,5 +11,7 @@ void debug_uart_init(void);
 void debug_uart_write(int ch);
 void esp_uart_init(void);
 void systick_delay_ms(uint32_t delay);
+void esp_rs_pin_init(void);
+void esp_rs_pin_enable(void);
 
 #endif /* ESP82XX_DRIVER_H_ */

@@ -85,7 +85,7 @@ void debug_uart_init(void)
  *
  * ESP pin              STM32F4 pin
  * -----------------------------------
- * ESP82xx RS pin (RESET)    :   PA8 OR 3.3V
+ * ESP82xx RS pin (RESET)    :   PA8 OR 3.3V (PA8 connection redudunt to fix NO ST Link detected error which not exist in ESP-01S; only in ESP-01)
  * ESP82xx EN pin            :   3.3v
  * ESP82xx IO1 pin (GPIO 0)  :   3.3v
  * ESP82xx IO2 pin (GPIO 2)  :   3.3v
@@ -95,6 +95,24 @@ void debug_uart_init(void)
  * ESP82xx RX pin            :   PA9 (TX)
  *
  */
+void esp_rs_pin_init(void)
+{
+	// Enable clock access to GPIOA
+	RCC->AHB1ENR |= GPIOAEN;
+
+	// Set PA8 as ouput pin
+  GPIOA->MODER |= (0x1UL << (16U));
+  GPIOA->MODER &= ~(0x1UL << (17U));
+}
+
+
+void esp_rs_pin_enable(void)
+{
+	// Set PA8 to high
+	GPIOA->ODR |= (0x1UL << (8U));
+}
+
+
 void esp_uart_init(void)
 {
   // Enable clock access to GPIOA

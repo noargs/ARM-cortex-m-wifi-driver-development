@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 void esp82xx_server_init(char *ssid, char *password);
-int8_t send_server_data(char *str, int link_id);
+void server_begin(void);
+
 
 #endif /* ESP82XX_LIB_H_ */

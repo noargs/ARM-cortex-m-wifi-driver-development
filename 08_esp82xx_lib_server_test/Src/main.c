@@ -9,6 +9,7 @@
 #define PASSKEY                   "321321321"
 
 
+
 int main()
 {
 
@@ -18,9 +19,19 @@ int main()
 	// Initialise esp82xx uart
 	esp_uart_init();
 
+	// Initialise RS pin
+	// esp_rs_pin_init();
+
+	// Enable RS pin
+	// esp_rs_pin_enable();
+
 	// Initialise server
 	esp82xx_server_init(SSID_NAME, PASSKEY);
 
 
-	while(1);
+	while(1)
+	{
+		// Activate the server
+		server_begin();
+	}
 }
