@@ -209,7 +209,7 @@ void buffer_write(unsigned char c, portType uart )
 }
 
 
-int8_t is_data(portType uart)
+int32_t is_data(portType uart)
 {
 	if(uart ==  esp82xx_port)
 	{

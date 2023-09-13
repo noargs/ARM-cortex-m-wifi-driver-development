@@ -85,7 +85,7 @@ void debug_uart_init(void)
  *
  * ESP pin              STM32F4 pin
  * -----------------------------------
- * ESP82xx RS pin            :   PA8 OR 3.3V
+ * ESP82xx RS pin (RESET)    :   PA8 OR 3.3V
  * ESP82xx EN pin            :   3.3v
  * ESP82xx IO1 pin (GPIO 0)  :   3.3v
  * ESP82xx IO2 pin (GPIO 2)  :   3.3v
@@ -146,6 +146,7 @@ void esp_uart_init(void)
   USART1->CR1 |= CR1_UE;
 
 }
+
 
 void debug_uart_write(int ch)
 {

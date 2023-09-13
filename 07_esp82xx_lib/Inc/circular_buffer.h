@@ -23,7 +23,7 @@ void buffer_clear(portType uart);
 int32_t buffer_peek(portType uart);
 int32_t buffer_read(portType uart);
 void buffer_write(unsigned char c, portType uart );
-int8_t is_data(portType uart);
+int32_t is_data(portType uart);
 int8_t is_response(char *str);
 int8_t get_next_strs(char *str,uint8_t num_of_chars, char *dest_buffer);
 void buffer_send_string(const char *s, portType uart);

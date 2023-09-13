@@ -3,33 +3,25 @@
 #include "esp82xx_driver.h"
 #include "fifo.h"
 #include "circular_buffer.h"
+#include "esp82xx_lib.h"
 
+#define SSID_NAME                 "TP-LINK_apt4"
+#define PASSKEY                   "321321321"
 
-extern portType debug_port;
 
 int main()
 {
 
-	 /*Initialize debug uart*/
-   debug_uart_init();
+	// Initiailise debug uart
+	debug_uart_init();
 
-   /*Initialize circular buffer*/
-   circular_buffer_init();
+	// Initialise esp82xx uart
+	esp_uart_init();
 
-   /*Send string*/
-   buffer_send_string("Hello from DEBUG UART ...\n\r",debug_port);
+
+	// Initialise server
+	esp82xx_server_init(SSID_NAME, PASSKEY);
 
 
 	while(1);
-}
-
-void USART1_IRQHandler(void)
-{
-	esp82_uart_callback();
-}
-
-
-void USART2_IRQHandler(void)
-{
-	debug_uart_callback();
 }
