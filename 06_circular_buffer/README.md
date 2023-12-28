@@ -13,7 +13,7 @@ Two pointers are used:
 Sending the string _"http"_ to the circular buffer
 
 * String length = 4
-* After sending the entire string, **head pointer** = 4 (tail pointer = 0 since we have not read from the buffer)
+* After sending the entire string, **head pointer** = 4 (tail pointer = 0 since we have not read from the buffer yet)
 * After reading the entire buffer, **tail pointer** = 4
 
 ##### Finding the next location after head:
@@ -38,17 +38,17 @@ location = 5
 
 ##### Reading data:
 
-1. Read data at tail position into a variable
+1. Read data at tail position into a variable 
 `char new_data = buffer->data[buffer->tail]`
 
-2. Compute new tail position
+2. Compute new tail position 
 `buffer->tail = (buffer->tail + 1) % buffer_size`   
 
 
 ##### Writing data:
 
 1. Write data at head position  
-`buffer->data[buffer->head] = new_data
+`buffer->data[buffer->head] = new_data`
 
 2. Compute new head position  
-`buffer->head` = (buffer->head + 1) % buffer_size 
+`buffer->head` = (buffer->head + 1) % buffer_size`
