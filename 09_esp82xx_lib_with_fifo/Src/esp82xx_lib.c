@@ -55,7 +55,7 @@ static void wait_for_response(char *pt)
 // Convert string to lowercase
 char lc(char letter)
 {
-	if ((letter >= 'A') && (leter <= 'Z'))
+	if ((letter >= 'A') && (letter <= 'Z'))
 		letter |= 0x20;
 
 	return letter;
@@ -156,7 +156,7 @@ static void copy_software_to_hardware(void)
 // Ouput UART characters
 void uart_output_char(char data)
 {
-	if (tx_fifo_put(data) == FIFO_FAIL)
+	if (tx_fifo_put(data) == TX_FAIL)
 		return;
 
 	copy_software_to_hardware();

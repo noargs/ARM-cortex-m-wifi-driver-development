@@ -3,8 +3,8 @@
 #include "esp82xx_driver.h"
 #include "fifo.h"
 
-int tx_data_a[100];
-int rx_data_a[100];
+int tx_data_buffer[100];
+int rx_data_buffer[100];
 
 int main()
 {
@@ -26,21 +26,21 @@ int main()
     tx_fifo_get(&tx_data);
     rx_fifo_get(&rx_data);
 
-    tx_data_a[i] = tx_data;
-    rx_data_a[i] = rx_data;
+    tx_data_buffer[i] = tx_data;
+    rx_data_buffer[i] = rx_data;
   }
 
   printf("--------------------- [TX Test] ---------------------\n\r");
 
   for (int i=0; i<100; i++)
   {
-    printf("Data at `tx_data_a` idx %d = %d:\n\r",i, tx_data_a[i]);
+    printf("Data at `tx_data_buffer` idx %d = %d:\n\r",i, tx_data_buffer[i]);
   }
 
   printf("--------------------- [RX Test] ---------------------\n\r");
   for (int i=0; i<100; i++)
   {
-    printf("Data at `rx_data_a` idx %d = %d:\n\r",i, rx_data_a[i]);
+    printf("Data at `rx_data_buffer` idx %d = %d:\n\r",i, rx_data_buffer[i]);
   }
 
   while(1)

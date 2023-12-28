@@ -2,6 +2,7 @@
 #define ESP82XX_LIB_H_
 
 #include <stdio.h>
+#include <string.h>
 #include "esp82xx_driver.h"
 
 
