@@ -9,6 +9,12 @@ extern portType debug_port;
 
 int main()
 {
+	// Test `find_substr_in_str` API
+	char main_str[] = "Let'sdoHomework";
+	char substr_to_find[] = "Home";
+	find_substr_in_str(substr_to_find, main_str);
+
+
 
 	 /*Initialize debug uart*/
    debug_uart_init();

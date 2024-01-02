@@ -51,4 +51,4 @@ location = 5
 `buffer->data[buffer->head] = new_data`
 
 2. Compute new head position  
-`buffer->head` = (buffer->head + 1) % buffer_size`
+`buffer->head = (buffer->head + 1) % buffer_size`
