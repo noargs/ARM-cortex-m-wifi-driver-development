@@ -3,6 +3,7 @@
 
 
 static void buffer_store_char(circular_buffer* buffer, unsigned char c);
+static int8_t process_copy(char* str, char* dest_buffer, int start_position);
 
 #define CR1_RXNEIE		            (1U<<5)
 #define CR1_TXEIE		              (1U<<7)
@@ -66,6 +67,77 @@ void buffer_get_first_char(char *str)
 	}
 }
 
+int8_t buffer_get_next_str(char* str, uint8_t num_of_chars, char* dest_buffer)
+{
+	// make sure string exists
+	while (!buffer_isresponse(str));
+
+	for (int index =0; index < num_of_chars; index++)
+	{
+		while (!buffer_isdata_on_rx(esp82xx_port));
+		dest_buffer[index] = buffer_read(esp82xx_port);
+	}
+	return 1;
+}
+
+void buffer_send_str(const char* s, port_t uart)
+{
+	while (*s != '\0')
+	{
+		buffer_write(*s++, uart);
+	}
+}
+
+static int8_t process_copy(char* str, char* dest_buffer, int start_position)
+{
+	int current_position =0;
+	int string_length = strlen(str);
+	int index = start_position;
+
+	while (!buffer_isdata_on_rx(esp82xx_port));
+
+	while (buffer_peek(esp82xx_port) != str[current_position])
+	{
+		dest_buffer[index] = _rx_buffer1->buffer[_rx_buffer1->tail];
+		_rx_buffer1->tail = (uint16_t)(_rx_buffer1->tail +1) % UART_BUFFER_SIZE;
+		index++;
+
+		while (!buffer_isdata_on_rx(esp82xx_port));
+	}
+
+	while (buffer_peek(esp82xx_port) == str[current_position])
+	{
+		current_position++;
+		dest_buffer[index++] = buffer_read(esp82xx_port);
+
+		if (current_position == string_length)
+		{
+			return 1;
+		}
+		while (!buffer_isdata_on_rx(esp82xx_port));
+	}
+
+	if (current_position != string_length)
+	{
+		current_position =0;
+		process_copy(str, dest_buffer, index);
+	}
+
+	if (current_position == string_length)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int8_t buffer_copy_up_to_str(char* str, char* dest_buffer)
+{
+	return (process_copy(str, dest_buffer, 0));
+}
+
 int8_t find_substr_in_str(char* sub_str, char* str)
 {
 	// `str` main string i.e. 'homework' and find `sub_str` substring 'home'
@@ -93,7 +165,6 @@ void buffer_clear(port_t uart)
 {
 	if (uart == esp82xx_port)
 	{
-		// set buffer content to '\0'
 		memset(_rx_buffer1->buffer, '\0', UART_BUFFER_SIZE);
 		_rx_buffer1->head =0;
 	}
@@ -252,110 +323,33 @@ int8_t buffer_isresponse(char* str)
 
 }
 
-//
-//int8_t get_next_strs(char *str,uint8_t num_of_chars, char *dest_buffer)
-//{
-//	/*Make sure the string exists*/
-//	while(!is_response(str)){}
-//
-//	for(int indx=0; indx < num_of_chars ; indx++)
-//	{
-//		while(!is_data(esp82xx_port)){}
-//		dest_buffer[indx] =  buffer_read(esp82xx_port);
-//
-//	}
-//
-//	return 1;
-//}
-//
-//
-//void buffer_send_string(const char *s, portType uart)
-//{
-//	while(*s != '\0')
-//	{
-//		buffer_write(*s++,uart);
-//	}
-//}
-//
-//
-//static int8_t process_copy(char *str, char *dest_buffer, int start_pos)
-//{
-//	int curr_pos = 0;
-//	int len =  strlen(str);
-//	int indx = start_pos;
-//
-//	while(!is_data(esp82xx_port)){}
-//
-//	while(buffer_peek(esp82xx_port) != str[curr_pos] )
-//	{
-//		dest_buffer[indx] =  _rx_buffer1->buffer[_rx_buffer1->tail];
-//		_rx_buffer1->tail =  (uint16_t)(_rx_buffer1->tail + 1) % UART_BUFFER_SIZE;
-//		indx++;
-//
-//		while(!is_data(esp82xx_port)){}
-//	}
-//
-//	while(buffer_peek(esp82xx_port) == str[curr_pos])
-//	{
-//		curr_pos++;
-//		dest_buffer[indx++] = buffer_read(esp82xx_port);
-//
-//		if(curr_pos == len)
-//			return 1;
-//
-//		while(!is_data(esp82xx_port)){}
-//	}
-//
-//	if(curr_pos != len)
-//	{
-//		curr_pos = 0;
-//		process_copy(str, dest_buffer, indx);
-//	}
-//
-//	if(curr_pos  ==  len)
-//	{
-//		return 1;
-//	}
-//	else
-//	{
-//		return -1;
-//	}
-//}
-//
-//
-//int8_t copy_up_to_string(char * str, char * dest_buffer)
-//{
-//	/*Process copy*/
-//	return (process_copy(str,dest_buffer, 0));
-//}
-//
-//
-//void esp82_uart_callback(void)
-//{
-//	/*Check if RXNE is raised and also if RXNEIE is enabled*/
-//	if(((USART1->SR & SR_RXNE) != 0) && ((USART1->CR1 & CR1_RXNEIE) != 0))
-//	{
-//		unsigned char c = USART1->DR;
-//		buff_store_char(c,_rx_buffer1);
-//	}
-//
-//	/*Check if TXE is raised and also if TXEIE is enabled*/
-//	if(((USART1->SR & SR_TXE) != 0) && ((USART1->CR1 & CR1_TXEIE) != 0))
-//	{
-//		if(tx_buffer1.head  == tx_buffer1.tail)
-//		{
-//			USART1->CR1 &=~CR1_TXEIE;
-//		}
-//		else
-//		{
-//			unsigned char c  = tx_buffer1.buffer[tx_buffer1.tail];
-//			tx_buffer1.tail =  (tx_buffer1.tail + 1) % UART_BUFFER_SIZE;
-//
-//			USART1->DR = c;
-//
-//		}
-//	}
-//}
+void esp82_uart_callback(void)
+{
+	// check RXNE is raised and RXNEIE is enabled
+	if (((USART1->SR & USART_SR_RXNE) != 0) && (USART1->CR1 & USART_CR1_RXNEIE != 0))
+	{
+		unsigned char c = USART1->DR;
+		buffer_store_char(_rx_buffer1, c);
+	}
+
+	// check TXE is raised and TXEIE is enabled
+	if (((USART1->SR & USART_SR_TXE) != 0) && (USART1->CR1 & USART_CR1_TXEIE) != 0)
+	{
+		if (tx_buffer1.head == tx_buffer1.tail) // buffer empty; nothing there to transmit
+		{
+			USART1->CR1 &= ~USART_CR1_TXEIE;
+		}
+		else
+		{
+			unsigned char c = tx_buffer1.buffer[tx_buffer.tail];
+			tx_buffer1.tail = (tx_buffer1.tail + 1) % UART_BUFFER_SIZE;
+
+			USART1->DR = c;
+		}
+	}
+}
+
+
 //
 //
 //void debug_uart_callback(void)
