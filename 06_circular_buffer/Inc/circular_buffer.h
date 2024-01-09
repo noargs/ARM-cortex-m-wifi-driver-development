@@ -22,14 +22,14 @@ void buffer_clear(port_t uart);
 int32_t buffer_peek(port_t uart);
 int32_t buffer_read(port_t uart);
 void buffer_write(unsigned char c, port_t uart );
-void buffer_get_first_char(char *str);
 int8_t buffer_isdata_on_rx(port_t uart);
 int8_t buffer_isresponse(char *str);
 
+int8_t buffer_get_next_str(char* str, uint8_t num_of_chars, char* dest_buffer);
+void buffer_send_str(const char *s, port_t uart);
+int8_t buffer_copy_up_to_str(char* str, char* dest_buffer);
 int8_t find_substr_in_str(char* sub_str, char* str);
-int8_t get_next_strs(char *str,uint8_t num_of_chars, char *dest_buffer);
-void buffer_send_string(const char *s, portType uart);
-int8_t copy_up_to_string(char * str, char * dest_buffer);
+
 void esp82_uart_callback(void);
 void debug_uart_callback(void);
 

@@ -4,6 +4,7 @@
 
 static void buffer_store_char(circular_buffer* buffer, unsigned char c);
 static int8_t process_copy(char* str, char* dest_buffer, int start_position);
+static void buffer_get_first_char(char *str);
 
 #define CR1_RXNEIE		            (1U<<5)
 #define CR1_TXEIE		              (1U<<7)
@@ -56,7 +57,7 @@ static void buffer_store_char(circular_buffer* buffer, unsigned char c)
 
 // get the position of first character of a string in the buffer
 // this function is only needed to process our esp data, hence debug doesn't need
-void buffer_get_first_char(char *str)
+static void buffer_get_first_char(char *str)
 {
 	// make sure data is there in the buffer
 	while (!buffer_isdata_on_rx(esp82xx_port));
@@ -153,12 +154,11 @@ int8_t find_substr_in_str(char* sub_str, char* str)
 			j++;
 		else
 			j =0;
-
-		if (j == l)
-			return 1;         // success
-		else
-			return -1;
 	}
+	if (j == l)
+		return 1;         // success
+	else
+		return -1;
 }
 
 void buffer_clear(port_t uart)
@@ -303,7 +303,7 @@ int8_t buffer_isresponse(char* str)
 			current_position++;
 			buffer_read(esp82xx_port);
 
-			if (current_position == len)
+			if (current_position == string_length)
 			{
 				return 1;
 			}
@@ -326,7 +326,7 @@ int8_t buffer_isresponse(char* str)
 void esp82_uart_callback(void)
 {
 	// check RXNE is raised and RXNEIE is enabled
-	if (((USART1->SR & USART_SR_RXNE) != 0) && (USART1->CR1 & USART_CR1_RXNEIE != 0))
+	if (((USART1->SR & USART_SR_RXNE) != 0) && ((USART1->CR1 & USART_CR1_RXNEIE) != 0))
 	{
 		unsigned char c = USART1->DR;
 		buffer_store_char(_rx_buffer1, c);
@@ -341,7 +341,7 @@ void esp82_uart_callback(void)
 		}
 		else
 		{
-			unsigned char c = tx_buffer1.buffer[tx_buffer.tail];
+			unsigned char c = tx_buffer1.buffer[tx_buffer1.tail];
 			tx_buffer1.tail = (tx_buffer1.tail + 1) % UART_BUFFER_SIZE;
 
 			USART1->DR = c;
@@ -349,31 +349,28 @@ void esp82_uart_callback(void)
 	}
 }
 
+void debug_uart_callback(void)
+{
+	// check RXNE is raised and RXNEIE is enabled
+	if (((USART2->SR & USART_SR_RXNE) != 0) && ((USART2->CR1 & USART_CR1_RXNEIE) != 0))
+	{
+		unsigned char c = USART2->DR;
+		buffer_store_char(_rx_buffer2, c);
+	}
 
-//
-//
-//void debug_uart_callback(void)
-//{
-//	/*Check if RXNE is raised and also if RXNEIE is enabled*/
-//	if(((USART2->SR & SR_RXNE) != 0) && ((USART2->CR1 & CR1_RXNEIE) != 0))
-//	{
-//		unsigned char c = USART2->DR;
-//		buff_store_char(c,_rx_buffer2);
-//	}
-//
-//	/*Check if TXE is raised and also if TXEIE is enabled*/
-//	if(((USART2->SR & SR_TXE) != 0) && ((USART2->CR1 & CR1_TXEIE) != 0))
-//	{
-//		if(tx_buffer2.head  == tx_buffer2.tail)
-//		{
-//			USART2->CR1 &=~CR1_TXEIE;
-//		}
-//		else
-//		{
-//			unsigned char c  = tx_buffer2.buffer[tx_buffer2.tail];
-//			tx_buffer2.tail =  (tx_buffer2.tail + 1) % UART_BUFFER_SIZE;
-//
-//			USART2->DR = c;
-//		}
-//	}
-//}
+	// check TXE is raised and TXEIE is enabled
+	if (((USART2->SR & USART_SR_TXE) != 0) && (USART2->CR1 & USART_CR1_TXEIE) != 0)
+	{
+		if (tx_buffer2.head == tx_buffer2.tail) // buffer empty; nothing there to transmit
+		{
+			USART2->CR1 &= ~USART_CR1_TXEIE;
+		}
+		else
+		{
+			unsigned char c = tx_buffer2.buffer[tx_buffer2.tail];
+			tx_buffer2.tail = (tx_buffer2.tail + 1) % UART_BUFFER_SIZE;
+
+			USART2->DR = c;
+		}
+	}
+}
