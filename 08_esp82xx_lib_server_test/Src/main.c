@@ -16,6 +16,10 @@ int main()
 
 	esp_uart_init();
 
+	// RS pin is connected to PA8 instead of 3.3v
+	esp_rs_pin_init();
+	esp_rs_pin_enable();
+
 	esp82xx_server_init(SSID_NAME, PASSKEY);
 
 	while(1)

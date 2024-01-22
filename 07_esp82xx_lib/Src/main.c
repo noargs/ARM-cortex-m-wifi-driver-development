@@ -5,7 +5,7 @@
 #include "circular_buffer.h"
 #include "esp82xx_lib.h"
 
-#define SSID_NAME                 "Smart_"
+#define SSID_NAME                 "__hw_wifi__"
 #define PASSKEY                   "dude@dude.com"
 
 
