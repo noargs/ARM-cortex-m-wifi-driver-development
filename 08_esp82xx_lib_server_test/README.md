@@ -24,4 +24,4 @@ Download [ESP8266 (AT Commands instruction set) datasheet](https://www.espressif
 - Build/Run the code in your STM32 board and open Serial capture tool _RealTerm_ for Windows or _SerialTools_ for MacOS to get debug output. In order for debug output (USART2) to be seen correctly on Desktop we will keep **Baud Rate** as 115200 **Data bits** as 8, **Stop bits** 1 and **Parity** none
       
        
-<img src="images/sc01_08_esp82xx_lib_server_test.png" alt="Serial capture tool" title="Debug output on SerialTools">
+<img src="images/sc01_08_esp82xx_lib_server_test.png" alt="Serial capture tool" title="Debug output on SerialTools" style="display: inline-block; margin: 0 auto; max-width: 400px">
