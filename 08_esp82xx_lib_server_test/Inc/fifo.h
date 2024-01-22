@@ -1,7 +1,6 @@
-#include <stdint.h>
-
 #ifndef FIFO_H_
 #define FIFO_H_
+#include <stdint.h>
 
 typedef char tx_t;
 typedef char rx_t;

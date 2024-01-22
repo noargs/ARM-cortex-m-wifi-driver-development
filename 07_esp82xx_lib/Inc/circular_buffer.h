@@ -22,7 +22,7 @@ void buffer_clear(port_t uart);
 int32_t buffer_peek(port_t uart);
 int32_t buffer_read(port_t uart);
 void buffer_write(unsigned char c, port_t uart );
-int8_t buffer_isdata_on_rx(port_t uart);
+int32_t buffer_isdata_on_rx(port_t uart);
 int8_t buffer_isresponse(char *str);
 
 int8_t buffer_get_next_str(char* str, uint8_t num_of_chars, char* dest_buffer);

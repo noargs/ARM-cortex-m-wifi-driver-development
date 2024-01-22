@@ -13,10 +13,10 @@ static void esp82xx_create_tcp_server(void);
 static int8_t send_server_data(char *str, int link_id);
 
 
-extern portType esp82xx_port;
-extern portType debug_port;
+extern port_t esp82xx_port;
+extern port_t debug_port;
 
-char *home = " <html><head><meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\
+char *homepage_htmlres = " <html><head><meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\
 <title>HARDWARE CONTROL SERVER </title><style>\
  html { font-family: Helvetica;display: inline-block;margin: 0px auto;text-align: center;width:100%}\
  body{ margin-top: 50px;float: left;}  h1{color: #444444;margin: 50px auto 30px;}h3{color: #444444;margin-bottom: 50px;}\
@@ -55,13 +55,13 @@ void esp82xx_server_init(char *ssid, char *password)
 // Reset/Restart module (esp8266) - RM 2021.08 page: 8
 static void esp82xx_reset(void)
 {
-	buffer_send_string("AT+RST\r\n", esp82xx_port);
+	buffer_send_str("AT+RST\r\n", esp82xx_port);
 	systick_delay_ms(1000);
 
 	// Response: "OK"
-	while (!(is_response("OK\r\n")));
+	while (!(buffer_isresponse("OK\r\n")));
 
-	buffer_send_string("Reset was successful...\n\r", debug_port);
+	buffer_send_str("Reset was successful...\n\r", debug_port);
 }
 
 
@@ -72,12 +72,12 @@ static void esp82xx_startup_test(void)
 	buffer_clear(esp82xx_port);
 
 	// Send Test command
-	buffer_send_string("AT\r\n", esp82xx_port);
+	buffer_send_str("AT\r\n", esp82xx_port);
 
 	// Response: "OK"
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
-	buffer_send_string("AT Startup test successful...\n\r", debug_port);
+	buffer_send_str("AT Startup test successful...\n\r", debug_port);
 }
 
 
@@ -88,12 +88,12 @@ static void esp82xx_sta_mode(void)
 	buffer_clear(esp82xx_port);
 
 	// Send STA command
-	buffer_send_string("AT+CWMODE_CUR=1\r\n", esp82xx_port);
+	buffer_send_str("AT+CWMODE_CUR=1\r\n", esp82xx_port);
 
 	// Response: "OK"
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
-	buffer_send_string("STA mode set successfully...\n\r", debug_port);
+	buffer_send_str("STA mode set successfully...\n\r", debug_port);
 }
 
 
@@ -105,20 +105,20 @@ static void esp82xx_ap_connect(char *ssid, char *password)
 	// Clear esp uart buffer
 	buffer_clear(esp82xx_port);
 
-	buffer_send_string("Connecting to Access Point...\n\r", debug_port);
+	buffer_send_str("Connecting to Access Point...\n\r", debug_port);
 
 	// Put ssid, password and command into single packet
 	sprintf(data, "AT+CWJAP_CUR=\"%s\",\"%s\"\r\n", ssid, password);
 
 	// Send entire packet to esp uart
-	buffer_send_string(data, esp82xx_port);
+	buffer_send_str(data, esp82xx_port);
 
 	// Response: "OK"
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
 	sprintf(data, "Connected to \"%s\"\r\n", ssid);
 
-	buffer_send_string(data, debug_port);
+	buffer_send_str(data, debug_port);
 }
 
 
@@ -133,16 +133,16 @@ static void esp82xx_get_local_ip(void)
 	buffer_clear(esp82xx_port);
 
 	// Send 'get ip address' command
-	buffer_send_string("AT+CIFSR\r\n", esp82xx_port);
+	buffer_send_str("AT+CIFSR\r\n", esp82xx_port);
 
 	// Response: "CIFSR:STAIP,<Station IP address>
-	while(! (is_response("CIFSR:STAIP,\"")));
+	while(! (buffer_isresponse("CIFSR:STAIP,\"")));
 
 	// Copy IP address portion
-	while (! (copy_up_to_string("\"", ip_buffer)));
+	while (! (buffer_copy_up_to_str("\"", ip_buffer)));
 
 	// Response: "OK"
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
 	len = strlen(ip_buffer);
 
@@ -150,7 +150,7 @@ static void esp82xx_get_local_ip(void)
 
 	sprintf(data, "Local IP Address: %s \n\r", ip_buffer);
 
-	buffer_send_string(data, debug_port);
+	buffer_send_str(data, debug_port);
 }
 
 
@@ -160,12 +160,12 @@ static void esp82xx_multiple_connection_enable(void)
 	buffer_clear(esp82xx_port);
 
 	// Send 'Enable or disable mulitple connection'  - RM 2021.08 page: 50
-	buffer_send_string("AT+CIPMUX=1\r\n", esp82xx_port);
+	buffer_send_str("AT+CIPMUX=1\r\n", esp82xx_port);
 
 	// Response: "OK"
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
-	buffer_send_string("Multiple connections enabled...\n\r", debug_port);
+	buffer_send_str("Multiple connections enabled...\n\r", debug_port);
 }
 
 
@@ -175,12 +175,12 @@ static void esp82xx_create_tcp_server(void)
 	buffer_clear(esp82xx_port);
 
 	// Send 'create tcp server' cmd
-	buffer_send_string("AT+CIPSERVER=1,80\r\n", esp82xx_port);
+	buffer_send_str("AT+CIPSERVER=1,80\r\n", esp82xx_port);
 
 	// Response: "OK"
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
-	buffer_send_string("Please connect to the Local IP address above...\n\r", debug_port);
+	buffer_send_str("Please connect to the Local IP address above...\n\r", debug_port);
 
 }
 
@@ -195,21 +195,21 @@ static int8_t send_server_data(char *str, int link_id)
 	// Concatenate link_id,data length
 	sprintf(data, "AT+CIPSEND=%d,%d\r\n", link_id, len);
 
-	buffer_send_string(data, esp82xx_port);
+	buffer_send_str(data, esp82xx_port);
 
 	// Response: ">"
-	while (! (is_response(">")));
+	while (! (buffer_isresponse(">")));
 
-	buffer_send_string(str, esp82xx_port);
+	buffer_send_str(str, esp82xx_port);
 
-	while (! (is_response("SEND OK")));
+	while (! (buffer_isresponse("SEND OK")));
 
 	// Close connection (5=close all connections)
 	sprintf(data, "AT+CIPCLOSE=5\r\n");
 
-	buffer_send_string(data, esp82xx_port);
+	buffer_send_str(data, esp82xx_port);
 
-	while (! (is_response("OK\r\n")));
+	while (! (buffer_isresponse("OK\r\n")));
 
 	return 1;
 }
@@ -223,7 +223,7 @@ void server_begin(void)
 
 	link_id -= 48;
 
-	send_server_data(home, link_id);
+	send_server_data(homepage_htmlres, link_id);
 }
 
 

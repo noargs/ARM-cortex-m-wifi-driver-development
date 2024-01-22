@@ -272,7 +272,7 @@ void buffer_write(unsigned char c, port_t uart)
 
 
 // check RX contains data
-int8_t buffer_isdata_on_rx(port_t uart)
+int32_t buffer_isdata_on_rx(port_t uart)
 {
 	if (uart == esp82xx_port)
 	{
