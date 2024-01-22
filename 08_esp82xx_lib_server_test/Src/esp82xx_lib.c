@@ -10,7 +10,7 @@ static void esp82xx_ap_connect(char *ssid, char *password);
 static void esp82xx_get_local_ip(void);
 static void esp82xx_multiple_connection_enable(void);
 static void esp82xx_create_tcp_server(void);
-static int8_t send_server_data(char *str, int link_id);
+static int8_t esp82xx_send_server_data(char *str, int link_id);
 
 
 extern port_t esp82xx_port;
@@ -42,7 +42,7 @@ char *homepage_htmlres = " <html><head><meta name=\"viewport\"content=\"width=de
 
 void esp82xx_server_init(char *ssid, char *password)
 {
-	circular_buffer_init();
+	buffer_init();
 	esp82xx_reset();
 	esp82xx_startup_test();
 	esp82xx_sta_mode();
@@ -116,7 +116,7 @@ static void esp82xx_ap_connect(char *ssid, char *password)
 	// Response: "OK"
 	while (! (buffer_isresponse("OK\r\n")));
 
-	sprintf(data, "Connected to \"%s\"\r\n", ssid);
+	sprintf(data, "Connected to \"%s\"\n\r", ssid);
 
 	buffer_send_str(data, debug_port);
 }
@@ -148,7 +148,7 @@ static void esp82xx_get_local_ip(void)
 
 	ip_buffer[len - 1] = '\0';
 
-	sprintf(data, "Local IP Address: %s \n\r", ip_buffer);
+	sprintf(data, "Local IP Address: %s\n\r", ip_buffer);
 
 	buffer_send_str(data, debug_port);
 }
@@ -186,7 +186,7 @@ static void esp82xx_create_tcp_server(void)
 
 
 // Send data to the server - RM 2021.08 page: 45 and 49
-static int8_t send_server_data(char *str, int link_id)
+static int8_t esp82xx_send_server_data(char *str, int link_id)
 {
 	char data[80];
 
@@ -215,15 +215,15 @@ static int8_t send_server_data(char *str, int link_id)
 }
 
 
-void server_begin(void)
+void esp82xx_server_begin(void)
 {
 	char link_id;
 
-	while (! get_next_strs("+IPD,",1,&link_id));
+	while (! buffer_get_next_str("+IPD,",1,&link_id));
 
 	link_id -= 48;
 
-	send_server_data(homepage_htmlres, link_id);
+	esp82xx_send_server_data(homepage_htmlres, link_id);
 }
 
 

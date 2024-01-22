@@ -162,7 +162,7 @@ static void esp82xx_create_tcp_server(void)
 
 
 // Send data to the server - RM 2021.08 page: 45 and 49
-int8_t send_server_data(char *str, int link_id)
+int8_t esp82xx_send_server_data(char *str, int link_id)
 {
 	char data[80];
 
