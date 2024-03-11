@@ -1,4 +1,4 @@
-### Webserver test with Esp8266-01S Wifi chip library (ARM Cortex Mx STM32) using Circular Buffer
+### Esp8266-01S Wifi chip library (ARM Cortex Mx STM32) using FIFO
 
 Download [ESP8266 (AT Commands instruction set) datasheet](https://www.espressif.com/sites/default/files/documentation/4a-esp8266_at_instruction_set_en.pdf)
      
@@ -17,8 +17,28 @@ Download [ESP8266 (AT Commands instruction set) datasheet](https://www.espressif
 | VCC          | 3.3v         |
 | GND          | GND          |
 | Tx           | PA10 (Rx)    |
-| Rx           | PA9  (Tx)    |
-
+| Rx           | PA9  (Tx)    |    
+     
+      
+**Following functionalities are implemented**     
+      
+- Send command to ESP82xx chip    
+    
+- Initialise string search in Rx data stream    
+     
+- Search for string in Rx data stream     
+      
+- Look for server response in Rx data stream     
+      
+- Copy content of UART DR into Fifo    
+     
+- Copy content of Fifo into UART DR    
+        
+- Output UART character     
+      
+- Callback function for ESP82xx UART    
+     
+- ESP82xx UART IRQ Handler     
 
 - Replace your WiFi Name and Password in the `main.c` macros (i.e. `SSID_NAME` and `PASSKEY`)     
 

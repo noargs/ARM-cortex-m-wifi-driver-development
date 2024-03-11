@@ -114,6 +114,12 @@ void esp_rs_pin_enable(void)
 	GPIOA->ODR |= (0x1UL << (8U));
 }
 
+void esp_rs_pin_disable(void)
+{
+	// Set PA8 to high
+	GPIOA->ODR &= ~(0x1UL << (8U));
+}
+
 
 void esp_uart_init(void)
 {
@@ -163,13 +169,21 @@ void esp_uart_init(void)
   USART1->CR1 |= CR1_RXENEIE;
 
   //5. Enable UART2 interrupt in NVIC
-  NVIC_EnableIRQ(USART1_IRQn);
+//  NVIC_EnableIRQ(USART1_IRQn); // Enable it in the library instead
 
   //6. Enable the UART module
   USART1->CR1 |= CR1_UE;
 
 }
 
+void esp_uart_write_char(char ch)
+{
+	/* make sure the transmit data register is empty */
+	while (!(USART1->SR & SR_TXE));
+
+	/* write to transmit data register */
+	USART1->DR = (ch & 0xFF);
+}
 
 void debug_uart_write(int ch)
 {

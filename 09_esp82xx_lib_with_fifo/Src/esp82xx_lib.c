@@ -1,148 +1,240 @@
 #include "esp82xx_lib.h"
 #include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 #include "fifo.h"
+
+static void esp_server_response_search_start(void);
+static void esp_wait_response(char* pt);
+static void esp_search_check(char letter);
+static void esp_wait_response(char* pt);
+static void esp_copy_software_to_hardware(void);
+static void esp_uart_callback(void);
+static void esp82xx_process_data(void);
+static void esp_uart_output_char(char data);
+
+static uint8_t esp82xx_reset(void);
 
 #define SR_RXNE                           (1U << 5)
 #define SR_TXE                            (1U << 7)
+#define FIFO_FAIL                         0
 
-#define SERVER_RESPONSE_SIZE               1024
-#define BUFFER_SIZE                        1024
+#define SERVER_RESPONSE_SIZE              1024
 
-uint32_t RXBUFFERIndex = 0;
-uint32_t LastReturnIndex = 0;
-uint32_t CurrentReturnIndex = 0;
+#define MAX_TRIES                         10
 
-char RXBuffer[BUFFER_SIZE];
-char TXBuffer[BUFFER_SIZE];
+char Sub_str[32];
+volatile bool Searching          =  false;
+volatile bool Is_response        =  false;
+volatile int Search_index        =  0;
+
+char Server_response_sub_str[16]               =  "+ipd,";  // `Internet Protocol Datagram`s data, consist of `header` and actual `data`
+volatile bool Server_response_search_completed =  false;
+volatile int Server_response_search_index      =  0;
+volatile int Server_response_searching         =  0;
+int Server_response_index                      =  0;
 
 // Buffer to hold characters after "+IPD," substring
-char server_response_buffer[SERVER_RESPONSE_SIZE];
+char ServerResponseBuffer[SERVER_RESPONSE_SIZE];
 
-char sub_str[32];
-volatile bool searching          =  false;
-volatile bool is_response        =  false;
-volatile int search_index        =  0;
+char Temp_Buffer[1024];
 
-char server_response_sub_str[16]              =  "+ipd,";
-volatile bool server_search_response_complete =  false;
-volatile int server_response_search_index     =  0;
-volatile int server_response_searching        =  0;
+void esp82xx_init(const char* ssid, const char* password)
+{
+	/* enable fifos */
+	tx_fifo_init();
+	rx_fifo_init();
 
-int server_response_index                     =   0;
+	/* enable rs pin */
+	esp_rs_pin_init();
 
+	/* enable esp uart */
+	esp_uart_init();
 
-// Initialise string search for server response
+	/* enable debud uart */
+	debug_uart_init();
+
+	/* initialise flags */
+	Searching = false;
+	Is_response = false;
+	Server_response_searching = 0;
+	Server_response_search_completed = 0;
+
+	printf("ESP8266 Initialisation...\r\n");
+
+	/* Enable interrupt */
+	NVIC_EnableIRQ(USART1_IRQn);
+
+	/* Reset esp module */
+	if (esp82xx_reset() == 0)
+		printf("Reset failure, could not reset \n\r");
+	else
+		printf("Reset was successful...\n\r");
+}
+
+/* Reset esp module */
+static uint8_t esp82xx_reset(void)
+{
+	uint8_t num_of_try = MAX_TRIES;
+	esp_wait_response("ok\r\n");
+
+	while (num_of_try)
+	{
+		/* set reset pin low */
+		esp_rs_pin_disable();
+
+		/* wait a bit */
+		systick_delay_ms(10);
+
+		/* set reset pin high */
+		esp_rs_pin_enable();
+
+		/* send RST command */
+		esp82xx_send_cmd("AT+RST\r\n");
+
+		/* wait */
+		systick_delay_ms(500);
+
+		/* check for response */
+		if (Is_response) return 1;  // success
+
+		num_of_try--;
+	}
+
+	/* failed */
+	return 0;
+}
+
+/* Set wifi mode */
+
+/* List access point */
+
+/* Get local ip address */
+
+/*
+ * Initialise string search for server response before searching in Rx stream
+ */
 static void esp_server_response_search_start(void)
 {
-	strcpy(sub_str, "+ipd,");
-	server_response_search_index    = 0;
-	server_response_searching       = 1;
-	server_search_response_complete = false;
-	server_response_index           = 0;
+	strcpy(Server_response_sub_str, "+ipd,");
+	Server_response_search_index     = 0;
+	Server_response_searching        = 1;
+	Server_response_search_completed = false;
+	Server_response_index            = 0;
 }
 
 
-// Initialise string search in Rx data stream
-static void wait_for_response(char *pt)
+/*
+ * Initialise string search in Rx stream
+ *
+ * Whenver we start a search (i.e. searching substring) we
+ *   copy the substring and place into `Server_response_sub_str[16]`
+ */
+static void esp_wait_response(char* pt)
 {
-	strcpy(server_response_sub_str, pt);
-	search_index = 0;
-	is_response  = false;
-	searching    = true;
+	strcpy(Sub_str, pt);
+	Search_index = 0;
+	Is_response  = false;
+	Searching    = true;
 }
 
 
-// Convert string to lowercase
-char lc(char letter)
+/*
+ * Convert to lowercase
+ */
+char esp_lc(char letter)
 {
 	if ((letter >= 'A') && (letter <= 'Z'))
+	{
 		letter |= 0x20;
-
+	}
 	return letter;
 }
 
 
-// Search for string in Rx data stream
-static void search_check(char letter)
+/*
+ * Search for string in Rx data stream
+ */
+static void esp_search_check(char letter)
 {
-	if (searching)
+	if (Searching)
 	{
-		// Check if characters match
-    if (sub_str[search_index == lc(letter)])
-    {
-    	search_index++;
-
-    	// Check if strings match
-    	if (sub_str[search_index] == 0)
-    	{
-    		is_response = true;
-    		searching   = false;
-    	}
-    }
-    else
-    {
-    	// Start over
-    	search_index = 0;
-    }
-	}
-}
-
-
-// Search for server response in Rx data stream
-static void esp_server_response_search_check(char letter)
-{
-	if (server_response_searching == 1)
-	{
-		// Check if characters match
-		if (server_response_sub_str[server_response_search_index] == lc(letter))
+		if (Sub_str[Search_index] == esp_lc(letter)) // Check if characters match
 		{
-			server_response_search_index++;
+			Search_index++;
 
-			// Check if strings match
-			if (server_response_sub_str[server_response_index] == 0)
+			if (Sub_str[Search_index] == 0)         // Check if string match
 			{
-				server_response_searching = 2;
-				strcpy(server_response_sub_str, "\n\rok\r\n");
-				server_response_search_index = 0;
+				Is_response = true;
+				Searching   = false;
 			}
 		}
 		else
 		{
 			// Start over
-			server_response_search_index = 0;
+			Search_index = 0;
 		}
-	}
-	else if (server_response_searching == 2)
-	{
-		if (server_response_index < SERVER_RESPONSE_SIZE)
-		{
-			server_response_buffer[server_response_index] = lc(letter);
-			server_response_index++;
-		}
-		// Check if characters match
-		if (server_response_sub_str[server_response_search_index] == lc(letter))
-		{
-			 server_response_search_index++;
-
-			 // Check if strings match
-			 if (server_response_sub_str[server_response_search_index] == 0)
-			 {
-				 server_search_response_complete = true;
-				 server_response_searching = 0;
-			 }
-		}
-		else
-		{
-			// Start over
-			server_response_search_index = 0;
-		}
-
 	}
 }
 
 
-// Copy content of tx_fifo into Debug UART DR
-static void copy_software_to_hardware(void)
+/*
+ * Search for server response in Rx data stream
+ */
+static void esp_server_response_search_check(char letter)
+{
+	if (Server_response_searching == 1)
+	{
+		// check if characters match
+		if (Server_response_sub_str[Server_response_search_index] == esp_lc(letter))
+		{
+			Server_response_search_index++;
+
+			// check if strings match
+			if (Server_response_sub_str[Server_response_search_index] == 0)
+			{
+				Server_response_searching = 2;
+				strcpy(Server_response_sub_str, "\n\rok\r\n");
+				Server_response_search_index = 0;
+			}
+		}
+		else
+		{
+			// Start over
+			Server_response_search_index = 0;
+		}
+	}
+	else if (Server_response_searching == 2)
+	{
+		if (Server_response_index < SERVER_RESPONSE_SIZE)
+		{
+			ServerResponseBuffer[Server_response_index] = esp_lc(letter);
+		}
+		// Check if characters match
+		if (Server_response_sub_str[Server_response_index] == esp_lc(letter))
+		{
+			Server_response_index++;
+
+			// Check if strings match
+			if (Server_response_sub_str[Server_response_index] == 0)
+			{
+				Server_response_search_completed = true;
+				Server_response_searching = 0;
+			}
+		}
+		else
+		{
+			// Start over
+			Server_response_search_index = 0;
+		}
+	}
+}
+
+
+/*
+ * Copy content of Fifo in to UART DR
+ */
+static void esp_copy_software_to_hardware(void)
 {
 	char letter;
 	while ((USART2->SR & SR_TXE) && tx_fifo_size() > 0)
@@ -152,54 +244,58 @@ static void copy_software_to_hardware(void)
 	}
 }
 
-
-// Ouput UART characters
-void uart_output_char(char data)
+/*
+ * ouput uart character
+ */
+static void esp_uart_output_char(char data)
 {
-	if (tx_fifo_put(data) == TX_FAIL)
+	if (tx_fifo_put(data) == FIFO_FAIL)
+	{
 		return;
-
-	copy_software_to_hardware();
+	}
+	esp_copy_software_to_hardware();
 }
 
-void esp_82xx_uart_to_fifo(void)
+static void esp82xx_process_data(void)
 {
 	char letter;
-	if (USART1->SR & SR_RXNE)
+
+	/* check if there is new data in uart data register */
+	if (USART1->SR && SR_RXNE)
 	{
+		/* store data from wifi uart data register in local variable */
 		letter = USART1->DR;
-		uart_output_char(letter);
 
-		if (RXBUFFERIndex >= BUFFER_SIZE)
-		{
-			RXBUFFERIndex = 0;
-		}
-		RXBuffer[RXBUFFERIndex] = letter;
-		RXBUFFERIndex++;
+		/* print data from wifi uart data register to debug uart i.e. computer */
+		esp_uart_output_char(letter);
 
-		// Check for end of command
-		search_check(letter);
+		/* check for end of command */
+		esp_search_check(letter);
 
-		// Check for server response
+		/* check for server response*/
 		esp_server_response_search_check(letter);
 
-		// Check for new line character
-		if (letter == '\n')
-		{
-
-		}
 	}
 }
 
+/* callback function for exp82xx uart */
+static void esp_uart_callback(void)
+{
+	esp82xx_process_data();
+}
 
-// Send command to esp82xx
+/* esp82xx uart irqhandler */
+void USART1_IRQHandler(void)
+{
+	esp_uart_callback();
+}
 
-// Look for server response in Rx data stream
-
-// Copy content of UART DR into FIFO
-
-
-
-// Callback function for esp82xx UART
-
-// esp82xx UART IRQHandler
+/* send command to esp82xx */
+void esp82xx_send_cmd(const char* cmd)
+{
+	int index = 0;
+	while (cmd[index] != 0)
+	{
+		esp_uart_write_char(cmd[index++]);
+	}
+}

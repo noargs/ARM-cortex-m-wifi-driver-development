@@ -1,4 +1,4 @@
-### Esp8266-01S Wifi chip library for ARM Cortex Mx STM32
+### Esp8266-01S Wifi chip library for ARM Cortex Mx STM32 using Circular Buffer
 
 Download [ESP8266 (AT Commands instruction set) datasheet](https://www.espressif.com/sites/default/files/documentation/4a-esp8266_at_instruction_set_en.pdf)
      
