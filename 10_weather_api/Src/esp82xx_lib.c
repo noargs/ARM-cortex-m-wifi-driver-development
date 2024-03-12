@@ -13,6 +13,7 @@ static void esp_copy_software_to_hardware(void);
 static void esp_uart_callback(void);
 static void esp82xx_process_data(void);
 static void esp_uart_output_char(char data);
+static void esp82xx_send_cmd(const char* cmd);
 
 static uint8_t esp82xx_reset(void);
 static uint8_t esp82xx_list_access_points(void);
@@ -96,8 +97,6 @@ void esp82xx_init(const char* ssid, const char* password)
 		printf("Couldn't join the wifi [%s]\n\r", ssid);
 	else
 		printf("Wifi [%s] joined successfully...\n\r", ssid);
-
-	esp82xx_dns_get_ip("https://www.google.co.uk/");
 }
 
 /* Reset esp module */
@@ -463,7 +462,7 @@ void USART1_IRQHandler(void)
 }
 
 /* send command to esp82xx */
-void esp82xx_send_cmd(const char* cmd)
+static void esp82xx_send_cmd(const char* cmd)
 {
 	int index = 0;
 	while (cmd[index] != 0)

@@ -97,7 +97,7 @@ void esp82xx_init(const char* ssid, const char* password)
 	else
 		printf("Wifi [%s] joined successfully...\n\r", ssid);
 
-	esp82xx_dns_get_ip("https://www.google.co.uk/");
+	esp82xx_dns_get_ip("google.co.uk");
 }
 
 /* Reset esp module */

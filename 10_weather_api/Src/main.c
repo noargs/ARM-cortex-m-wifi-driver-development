@@ -7,6 +7,7 @@
 #define SSID_NAME                 "__hw_wifi__"
 #define PASSKEY                   "dude@dude.com"
 
+char packet[] = "GET /data/2.5/weather?q=Dublin&appid=5b09120e312c5e379bf570743b49006c HTTP/1.1\r\nHost: api.openweathermap.org\r\n\r\n";
 
 
 int main()
@@ -15,6 +16,10 @@ int main()
 
 	while(1)
 	{
-
+		if (esp82xx_create_tcp_conn("82.196.7.246"))
+		{
+			esp82xx_send_tcp_pckt(packet);
+		}
+		esp82xx_close_tcp_connection();
 	}
 }

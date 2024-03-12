@@ -1,4 +1,18 @@
-
+* Sign in/Create account in [Open Weather API](https://openweathermap.org/) and get the [API keys](https://home.openweathermap.org/api_keys)    
+         
+      
+* Provide your **WiFi name**, **WiFi password**, and **API Keys** from OpenWeatherMap.org in `main.c` as shown below      
+         
+<img src="images/wifi_pass_apikeys.png" alt="Your WiFi name, password and API keys" title="Your WiFi name, password and API keys">       
+      
+      
+      
+*  API response in JSON from `OpenWeatherMap.org` on SerialTool (for MacOSX)     
+     
+<img src="images/response.png" alt="OpenWeatherMap.org response in JSON" title="OpenWeatherMap.org response in JSON">           
+     
+     
+     
     
 		
 		 
