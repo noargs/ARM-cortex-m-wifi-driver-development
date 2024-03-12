@@ -15,6 +15,10 @@ static void esp82xx_process_data(void);
 static void esp_uart_output_char(char data);
 
 static uint8_t esp82xx_reset(void);
+static uint8_t esp82xx_list_access_points(void);
+static uint8_t esp82xx_join_wifi_access_point(const char* ssid, const char* password);
+static uint8_t esp82xx_get_local_ip_addr(void);
+uint8_t esp82xx_create_tcp_conn(char* ip_addr);
 
 #define SR_RXNE                           (1U << 5)
 #define SR_TXE                            (1U << 7)
@@ -84,6 +88,15 @@ void esp82xx_init(const char* ssid, const char* password)
 	{
 		printf("Wifi mode set successfully...\n\r");
 	}
+
+	esp82xx_list_access_points();
+
+	if (esp82xx_join_wifi_access_point( ssid, password) == 0)
+		printf("Couldn't join the wifi [%s]\n\r", ssid);
+	else
+		printf("Wifi [%s] joined successfully...\n\r", ssid);
+
+	esp82xx_get_local_ip_addr();
 }
 
 /* Reset esp module */
@@ -139,12 +152,102 @@ static uint8_t esp82xx_set_wifi_mode(uint8_t mode)
 }
 
 /* List access point */
+static uint8_t esp82xx_list_access_points(void)
+{
+	uint8_t num_of_try = MAX_TRIES;
+	esp_wait_response("ok\r\n");
+
+	while (num_of_try){
+		esp82xx_send_cmd("AT+CWLAP\r\n");
+		systick_delay_ms(5000);
+
+		if (Is_response) return 1;
+
+		num_of_try--;
+	}
+	return 0;
+}
+
+/* Join access point */
+static uint8_t esp82xx_join_wifi_access_point(const char* ssid, const char* password)
+{
+	uint8_t num_of_try = MAX_TRIES;
+	esp_wait_response("ok\r\n");
+
+	while (num_of_try)
+	{
+		sprintf((char*)Temp_Buffer, "AT+CWJAP=\"%s\",\"%s\"\r\n", ssid, password);
+		esp82xx_send_cmd((const char*)Temp_Buffer);
+		systick_delay_ms(3000);
+
+		if (Is_response) return 1; // success
+		num_of_try--;
+	}
+	return 0;
+}
 
 /* Get local ip address */
+static uint8_t esp82xx_get_local_ip_addr(void)
+{
+	uint8_t num_of_try = MAX_TRIES;
+	esp_wait_response("ok\r\n");
 
-/*
- * Initialise string search for server response before searching in Rx stream
- */
+	while (num_of_try)
+	{
+		esp82xx_send_cmd("AT+CIFSR\r\n");
+		systick_delay_ms(3000);
+
+		if (Is_response) return 1; // success
+		num_of_try--;
+	}
+	return 0;
+}
+
+/* create tcp connection */
+uint8_t esp82xx_create_tcp_conn(char* ip_addr)
+{
+	uint8_t num_of_try = MAX_TRIES;
+	esp_wait_response("ok\r\n");
+
+	while (num_of_try)
+	{
+		sprintf((char*)Temp_Buffer, "AT+CIPSTART=\"TCP\",\"%s\",80\r\n", ip_addr);
+		esp82xx_send_cmd((const char*)Temp_Buffer);
+		systick_delay_ms(3000);
+
+		if (Is_response) return 1; // success
+		num_of_try--;
+	}
+	return 0;
+}
+
+/* send tcp packets to remote server */
+uint8_t esp82xx_send_tcp_pckt(char* pckt)
+{
+	/* combine packet length and command */
+	sprinft((char*)Temp_Buffer, "AT+CIPSEND=%d\r\n", strlen(pckt));
+
+	/* send packet length and command */
+	esp82xx_send_cmd(Temp_Buffer);
+	systick_delay_ms(50);
+	esp82xx_send_cmd(pckt);
+
+	/* initialise server response search */
+	esp_server_response_search_start();
+
+	while (Server_response_search_completed == false)
+	{
+		systick_delay_ms(1);
+	}
+	if (Server_response_search_completed == false)
+		return 0;
+	else
+		return 1;
+}
+
+
+
+/* Initialise string search for server response before searching in Rx stream */
 static void esp_server_response_search_start(void)
 {
 	strcpy(Server_response_sub_str, "+ipd,");
