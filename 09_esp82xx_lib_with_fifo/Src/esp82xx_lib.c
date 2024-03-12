@@ -5,6 +5,7 @@
 #include "fifo.h"
 
 static void esp_server_response_search_start(void);
+static uint8_t esp82xx_set_wifi_mode(uint8_t mode);
 static void esp_wait_response(char* pt);
 static void esp_search_check(char letter);
 static void esp_wait_response(char* pt);
@@ -20,6 +21,10 @@ static uint8_t esp82xx_reset(void);
 #define FIFO_FAIL                         0
 
 #define SERVER_RESPONSE_SIZE              1024
+
+#define ESP8266_WIFI_MODE_STA             1
+#define ESP8266_WIFI_MODE_AP              2
+#define ESP8266_WIFI_MODE_STA_AND_AF      3
 
 #define MAX_TRIES                         10
 
@@ -70,6 +75,15 @@ void esp82xx_init(const char* ssid, const char* password)
 		printf("Reset failure, could not reset \n\r");
 	else
 		printf("Reset was successful...\n\r");
+
+	if (esp82xx_set_wifi_mode(ESP8266_WIFI_MODE_STA) == 0)
+	{
+		printf("SetWifiMode Failed\n\r");
+	}
+	else
+	{
+		printf("Wifi mode set successfully...\n\r");
+	}
 }
 
 /* Reset esp module */
@@ -106,6 +120,23 @@ static uint8_t esp82xx_reset(void)
 }
 
 /* Set wifi mode */
+static uint8_t esp82xx_set_wifi_mode(uint8_t mode)
+{
+	uint8_t num_of_try = MAX_TRIES;
+	esp_wait_response("ok\r\n");
+
+	while (num_of_try)
+	{
+		sprintf((char*)Temp_Buffer, "AT+CWMODE=%d\r\n", mode);
+		esp82xx_send_cmd((const char*)Temp_Buffer);
+		systick_delay_ms(500);
+
+		if (Is_response) return 1; // success
+		num_of_try--;
+	}
+
+	return 0;
+}
 
 /* List access point */
 

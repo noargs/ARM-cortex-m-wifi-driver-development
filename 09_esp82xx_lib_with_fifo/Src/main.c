@@ -4,8 +4,8 @@
 #include "fifo.h"
 #include "esp82xx_lib.h"
 
-#define SSID_NAME                 "TP-LINK_apt4"
-#define PASSKEY                   "321321321"
+#define SSID_NAME                 "__hw_wifi__"
+#define PASSKEY                   "dude@dude.com"
 
 
 
