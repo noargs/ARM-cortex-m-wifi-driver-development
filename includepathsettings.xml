@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+  <section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+    <language id="org.eclipse.cdt.core.assembly" name="s,S"/>
+    <language id="org.eclipse.cdt.core.gcc" name="C Source File">
+      <includepath>Inc</includepath>
+      <includepath>/Users/nahl/dev/c/embedded/Embedded-wifi-development-stm32f411-esp8266/F4_headers/CMSIS/Include</includepath>
+      <includepath>/Users/nahl/dev/c/embedded/Embedded-wifi-development-stm32f411-esp8266/F4_headers/CMSIS/Device/ST/STM32F4xx/Include</includepath>
+    </language>
+    <language name="Object File"/>
+  </section>
+  <section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+    <language id="org.eclipse.cdt.core.assembly" name="s,S">
+      <macro>
+        <name>DEBUG</name>
+        <value/>
+      </macro>
+    </language>
+    <language id="org.eclipse.cdt.core.gcc" name="C Source File">
+      <macro>
+        <name>DEBUG</name>
+        <value/>
+      </macro>
+      <macro>
+        <name>NUCLEO_F411RE</name>
+        <value/>
+      </macro>
+      <macro>
+        <name>STM32</name>
+        <value/>
+      </macro>
+      <macro>
+        <name>STM32F4</name>
+        <value/>
+      </macro>
+      <macro>
+        <name>STM32F411RETx</name>
+        <value/>
+      </macro>
+      <macro>
+        <name>STM32F401xE</name>
+        <value/>
+      </macro>
+    </language>
+    <language name="Object File"/>
+  </section>
+</cdtprojectproperties>
