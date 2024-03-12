@@ -1,14 +1,12 @@
-#### FIFO (First-in-first-out) Data Structure
+## FIFO (First-in-first-out) Data Structure
 
 We need the data structure to manage both the packets, received and sent out. 
 
-* It is used to link _producers_ to _consumers_ (i.e. modules that produce data and modules that consume data)
-
-    `fifo_put()`                     `fifo_get()`
-   ------------->    [ **FIFO** ]    -------------->
-    producer                         consumer
+* It is used to link _producers_ to _consumers_ (i.e. modules that produce data and modules that consume data)     
+         
+<img src="images/fifo.png" alt="Producer to consumer link illustration" title="Producer to consumer link illustration"> 
      
-##### FIFO: Example of producers and consumers
+## FIFO: Example of producers and consumers
 
 | Producer               | Consumer                 |
 |:----------------------:|:------------------------:|
