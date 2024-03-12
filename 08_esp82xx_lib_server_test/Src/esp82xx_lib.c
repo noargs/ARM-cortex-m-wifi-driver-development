@@ -16,7 +16,7 @@ static int8_t esp82xx_send_server_data(char *str, int link_id);
 extern port_t esp82xx_port;
 extern port_t debug_port;
 
-char *homepage_htmlres = " <html><head><meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\
+char *HtmlRes_HomePage = " <html><head><meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\
 <title>HARDWARE CONTROL SERVER </title><style>\
  html { font-family: Helvetica;display: inline-block;margin: 0px auto;text-align: center;width:100%}\
  body{ margin-top: 50px;float: left;}  h1{color: #444444;margin: 50px auto 30px;}h3{color: #444444;margin-bottom: 50px;}\
@@ -223,7 +223,7 @@ void esp82xx_server_begin(void)
 
 	link_id -= 48;
 
-	esp82xx_send_server_data(homepage_htmlres, link_id);
+	esp82xx_send_server_data(HtmlRes_HomePage, link_id);
 }
 
 
