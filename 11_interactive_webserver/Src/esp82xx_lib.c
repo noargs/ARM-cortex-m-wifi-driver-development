@@ -2,6 +2,7 @@
 #include <string.h>
 #include "esp82xx_driver.h"
 #include "circular_buffer.h"
+#include "hardware_modules.h"
 
 static void esp82xx_reset(void);
 static void esp82xx_startup_test(void);
@@ -312,15 +313,89 @@ static int8_t esp82xx_send_server_data(char *str, int link_id)
 }
 
 
+void esp82xx_process_server_data(char* str, int link_id)
+{
+	if (strcmp(str, "/valve") == 0)
+	{
+		esp82xx_send_server_data(HtmlRes_ValvePage, link_id);
+	}
+	else if (strcmp(str, "/gripper") == 0)
+	{
+		esp82xx_send_server_data(HtmlRes_GripperPage, link_id);
+	}
+	else if (strcmp(str, "/pump") == 0)
+	{
+		esp82xx_send_server_data(HtmlRes_PumpPage, link_id);
+	}
+	else if (strcmp(str, "/light") == 0)
+	{
+		esp82xx_send_server_data(HtmlRes_LightPage, link_id);
+	}
+	else
+	{
+		esp82xx_send_server_data(HtmlRes_HomePage, link_id);
+	}
+}
+
+
 void esp82xx_server_begin(void)
 {
+	char dest_buffer[64] = {0};
 	char link_id;
 
 	while (! buffer_get_next_str("+IPD,",1,&link_id));
 
 	link_id -= 48;
 
-	esp82xx_send_server_data(HtmlRes_HomePage, link_id);
+	//	esp82xx_send_server_data(HtmlRes_HomePage, link_id);
+
+	while (!(buffer_copy_up_to_str("HTTP/1.1", dest_buffer)));
+
+	if (find_substr_in_str("/valve", dest_buffer) == 1)
+	{
+		esp82xx_process_server_data("/valve", link_id);
+		valve_on();
+		pump_off();
+		light_off();
+		gripper_off();
+
+		buffer_send_str("\r\nValve module diagnostics starting ...\r\n", debug_port);
+	}
+	else if (find_substr_in_str("/gripper", dest_buffer) == 1)
+	{
+		esp82xx_process_server_data("/gripper", link_id);
+		valve_off();
+		pump_off();
+		light_off();
+		gripper_on();
+
+		buffer_send_str("\r\nGripper module diagnostics starting ...\r\n", debug_port);
+	}
+	else if (find_substr_in_str("/light", dest_buffer) == 1)
+	{
+		esp82xx_process_server_data("/light", link_id);
+		valve_off();
+		pump_off();
+		light_on();
+		gripper_off();
+
+		buffer_send_str("\r\nLight module diagnostics starting ...\r\n", debug_port);
+	}
+	else if (find_substr_in_str("/pump", dest_buffer) == 1)
+	{
+		esp82xx_process_server_data("/pump", link_id);
+		valve_off();
+		pump_on();
+		light_off();
+		gripper_off();
+
+		buffer_send_str("\r\nPump module diagnostics starting ...\r\n", debug_port);
+	}
+	else
+	{
+		esp82xx_process_server_data("/", link_id);
+	}
+
 }
 
 
