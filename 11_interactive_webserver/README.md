@@ -1,4 +1,4 @@
-- Run the App `11_interactive_webserver` in to the STM32 board and type following IP shown on Debug UART on to the Web browser to control different modules     
+- Run the App `11_interactive_webserver` in the STM32 board and type following IP shown on Debug UART on to the Web browser to control different modules     
      
 		 
 <img src="images/hw_control_server.png" alt="Hardware control server on ESP01s chip" title="Hardware control server on ESP01s chip">		 
