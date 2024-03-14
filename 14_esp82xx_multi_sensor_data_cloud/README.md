@@ -14,12 +14,11 @@ Build/Run the project on to your board, and open Serial capture tool _RealTerm_ 
       
 There's 3 seconds delay between each request `systick_delay_ms(3000)` to ThingSpeak (Rotate the potentiometer knob slowly in every 3 seconds)    
     
-         
+<img src="images/thingspeak_reading_graph.png" alt="ThingSpeak reading graph of Sensor value and Filtered value" title="ThingSpeak reading graph of Sensor value and Filtered value">           
     
 		
 		
     
-
 
 
 			

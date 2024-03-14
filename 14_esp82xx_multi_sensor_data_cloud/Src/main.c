@@ -25,10 +25,10 @@ int main()
 	esp_rs_pin_enable();
 
 	// Initialise hardware modules
-	light_init();
-	valve_init();
-	pump_init();
-	gripper_init();
+//	light_init();
+//	valve_init();
+//	pump_init();
+//	gripper_init();
 
 	// Initialise ADC
 	pa1_adc_init();
@@ -47,7 +47,7 @@ int main()
 		packet[0] = sensor_value;
 		packet[1] = filtered_value;
 
-		esp82xx_thingspeak_send_multi_field(WRITE_API_KEY, FIELD_NUMBER, packet);
+		esp82xx_thingspeak_send_multi_field(WRITE_API_KEY, NUMBER_OF_FIELDS, packet);
 
 		systick_delay_ms(3000);
 	}
