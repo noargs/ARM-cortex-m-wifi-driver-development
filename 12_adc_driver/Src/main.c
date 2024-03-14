@@ -1,3 +1,4 @@
+#include "stm32f4xx.h"
 #include "adc.h"
 
 uint32_t sensor_value;
