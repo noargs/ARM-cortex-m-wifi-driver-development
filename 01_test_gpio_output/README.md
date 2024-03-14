@@ -1,0 +1,50 @@
+## Test GPIOA Output    
+    
+- Enable clock access to GPIOA     
+    
+- Set PA5 of NUCLEO-F411RE to Output Mode    
+    
+- Set PA5 to High               
+    
+
+
+			
+	 		 
+
+         
+		 
+           
+		 
+     
+		  	 						 		 
+		     
+		 
+	
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+    
+    
+    
+
+     
+     
+
+     
+     
+
+     
+    
+    
