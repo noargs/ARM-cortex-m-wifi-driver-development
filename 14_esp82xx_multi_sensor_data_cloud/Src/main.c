@@ -9,9 +9,10 @@
 #define SSID_NAME                 "__hw_wifi__"
 #define PASSKEY                   "dude@dude.com"
 #define WRITE_API_KEY             "YOUR_WRITE_API_KEY_HERE"
-#define FIELD_NUMBER              1
+#define NUMBER_OF_FIELDS          2
 
-uint32_t sensor_value;
+uint32_t sensor_value, filtered_value;
+uint32_t packet[2];
 
 int main()
 {
@@ -41,7 +42,13 @@ int main()
 	while(1)
 	{
 		sensor_value = adc_read();
-		esp82xx_thingspeak_send(WRITE_API_KEY, FIELD_NUMBER, sensor_value);
+		filtered_value = sensor_value + 100; // simulate another sensor to send multiple fields to ThingSpeak
+
+		packet[0] = sensor_value;
+		packet[1] = filtered_value;
+
+		esp82xx_thingspeak_send_multi_field(WRITE_API_KEY, FIELD_NUMBER, packet);
+
 		systick_delay_ms(3000);
 	}
 }

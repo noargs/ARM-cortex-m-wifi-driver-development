@@ -20,9 +20,9 @@ Our created channel look something like below image. Next click on **API Keys** 
      
 <img src="images/at_cipstart.png" alt="ESP8266 AT Instructions" title="ESP8266 AT Instructions">      
       
-Replace the `WRITE_API_KEY` macro in `main.c` with your _Write API Key_ from ThingSpeak and Build/Run the project on to your board, and open Serial capture tool _RealTerm_ for Windows or _SerialTools_ for MacOS to get debug output.         
+Replace the `WRITE_API_KEY` macro in `main.c` with your _Write API Key_ from ThingSpeak, Replace `SSID_NAME`, `PASSKEY` with you WiFi _Name_ and _Password_. Now Build/Run the project on to your board, and open Serial capture tool _RealTerm_ for Windows or _SerialTools_ for MacOS to get debug output.         
       
-There's 3 seconds delay between each request `systick_delay_ms(3000)` to ThingSpeak.     
+There's 3 seconds delay between each request `systick_delay_ms(3000)` to ThingSpeak (Rotate the potentiometer knob slowly in every 3 seconds)     
      
 <img src="images/thingspeak_potentiometer_reading_graph.png" alt="ThingSpeak potentiometer reading graph" title="ThingSpeak potentiometer reading graph">          
       

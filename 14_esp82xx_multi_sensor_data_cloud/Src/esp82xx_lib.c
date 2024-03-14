@@ -434,6 +434,55 @@ static void buffer_reset(char* buffer)
 	}
 }
 
+void esp82xx_thingspeak_send_multi_field(char* apikey, int num_of_fields, uint32_t sensor_value[])
+{
+	char local_buff1[100] = {0};
+	char local_buff2[100] = {0};
+	char local_buff3[100] = {0};
+
+	// establish TCP connection with ThingSpeak
+	buffer_send_str("AT+CIPSTART=\"TCP\",\"34.231.74.177\",80\r\n", esp82xx_port);   // or 184.106.153.149
+
+	// wait for "OK" response
+	while (! (buffer_isresponse("OK\r\n")));
+
+	sprintf(local_buff1, "GET /update?api_key=%s", apikey);
+
+	for (int i=0; i<num_of_fields; i++)
+	{
+		sprintf(local_buff3, "&field%d=%lu", i+1, sensor_value[i]);
+		strcat(local_buff1, local_buff3);
+	}
+
+	strcat(local_buff1, "\r\n");
+	int len = strlen(local_buff1);
+
+	sprintf(local_buff2, "AT+CIPSEND=%d\r\n", len);
+
+	// send buffer length
+	buffer_send_str(local_buff2, esp82xx_port);
+
+	// wait for ">" response
+	while (! (buffer_isresponse(">")));
+
+	// send parameters
+	buffer_send_str(local_buff1, esp82xx_port);
+
+	// wait for "SEND OK" response
+	while (! (buffer_isresponse("SEND OK\r\n")));
+
+	// wait for "CLOSED" response
+	while (! (buffer_isresponse("CLOSED")));
+
+	// clear buffers
+	buffer_reset(local_buff1);
+	buffer_reset(local_buff2);
+	buffer_reset(local_buff3);
+
+	// re-initialise the Circluar Buffer
+	buffer_init();
+}
+
 void esp82xx_thingspeak_send(char* apikey, int field_no, uint32_t sensor_value)
 {
 	char local_buff1[100] = {0};

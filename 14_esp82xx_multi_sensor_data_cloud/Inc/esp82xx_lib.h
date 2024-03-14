@@ -6,6 +6,7 @@
 void esp82xx_server_init(char *ssid, char *password);
 void esp82xx_server_begin(void);
 void esp82xx_thingspeak_send(char* apikey, int field_no, uint32_t sensor_value);
+void esp82xx_thingspeak_send_multi_field(char* apikey, int num_of_fields, uint32_t sensor_value[]);
 void esp82xx_device_init(char *ssid, char *password);
 
 
