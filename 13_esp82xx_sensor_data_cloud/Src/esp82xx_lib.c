@@ -9,9 +9,11 @@ static void esp82xx_startup_test(void);
 static void esp82xx_sta_mode(void);
 static void esp82xx_ap_connect(char *ssid, char *password);
 static void esp82xx_get_local_ip(void);
+static void esp82xx_single_connection_enable(void);
 static void esp82xx_multiple_connection_enable(void);
 static void esp82xx_create_tcp_server(void);
 static int8_t esp82xx_send_server_data(char *str, int link_id);
+static void buffer_reset(char* buffer);
 
 
 extern port_t esp82xx_port;
@@ -150,6 +152,16 @@ void esp82xx_server_init(char *ssid, char *password)
 	esp82xx_create_tcp_server();
 }
 
+void esp82xx_device_init(char *ssid, char *password)
+{
+	buffer_init();
+	esp82xx_reset();
+	esp82xx_startup_test();
+	esp82xx_sta_mode();
+	esp82xx_ap_connect(ssid, password);
+	esp82xx_single_connection_enable();
+}
+
 // Reset/Restart module (esp8266) - RM 2021.08 page: 8
 static void esp82xx_reset(void)
 {
@@ -257,13 +269,27 @@ static void esp82xx_multiple_connection_enable(void)
 {
 	buffer_clear(esp82xx_port);
 
-	// Send 'Enable or disable mulitple connection'  - RM 2021.08 page: 50
+	// Send 'Enable mulitple connection' command  - RM 2021.08 page: 50
 	buffer_send_str("AT+CIPMUX=1\r\n", esp82xx_port);
 
 	// Response: "OK"
 	while (! (buffer_isresponse("OK\r\n")));
 
 	buffer_send_str("Multiple connections enabled...\n\r", debug_port);
+}
+
+// Enable single connection
+static void esp82xx_single_connection_enable(void)
+{
+	buffer_clear(esp82xx_port);
+
+	// Send 'Enable single connection' command - RM 2021.08 page: 50
+	buffer_send_str("AT+CIPMUX=0\r\n", esp82xx_port);
+
+	// Response: "OK"
+	while (! (buffer_isresponse("OK\r\n")));
+
+	buffer_send_str("Single connection enabled...\n\r", debug_port);
 }
 
 
@@ -408,7 +434,7 @@ static void buffer_reset(char* buffer)
 	}
 }
 
-void esp82xx_thingspeak_send(char* apikey, int field_no, uint32_t value)
+void esp82xx_thingspeak_send(char* apikey, int field_no, uint32_t sensor_value)
 {
 	char local_buff1[100] = {0};
 	char local_buff2[100] = {0};
@@ -419,7 +445,7 @@ void esp82xx_thingspeak_send(char* apikey, int field_no, uint32_t value)
 	// wait for "OK" response
 	while (! (buffer_isresponse("OK\r\n")));
 
-	sprintf(local_buff1, "GET /update?api_key=%s&field&%d=%u\r\n", apikey, field_no, value);
+	sprintf(local_buff1, "GET /update?api_key=%s&field&%d=%lu\r\n", apikey, field_no, sensor_value);
 
 	int len = strlen(local_buff1);
 	sprintf(local_buff2, "AT+CIPSEND=%d\r\n", len);

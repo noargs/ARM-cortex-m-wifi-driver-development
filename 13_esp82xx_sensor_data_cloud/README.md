@@ -1,4 +1,10 @@
-We used [ThingSpeak](https://thingspeak.com/) in this project, Which allows us to send our data to cloud and provide realtime analytics in the dashboard.    
+## Send potentiometer reading from ADC channel to the cloud      
+     
+Connect one potentometer's middle pin to the PA1 of NUCLEO-F411RE and either side pins to 3.3v and GND.   
+     
+Rest of the connection details of NUCLEO-F411RE with ESP01s chip is in [README](https://github.com/noargs/ARM-cortex-m-wifi-driver-development/blob/main/README.md).     
+      
+We use [ThingSpeak](https://thingspeak.com/) in this project, Which allows us to collect, analyse, act on our IoT data in the cloud and provide realtime analytics in the dashboard.    
     
 You need [MathWorks](https://mathworks.com/) account to access ThingSpeak.   
      
@@ -10,9 +16,11 @@ Our created channel look something like below image. Next click on **API Keys** 
 		
 <img src="images/created_channel.png" alt="Channel window" title="Channel window">    
      
-`espxx_thingspeak_send()` API uses AT command `AT+CIPSTART` in `esp82xx_lib.c` to create TCP connection and communicate with ThingSpeak via GET request   
+`esp82xx_thingspeak_send()` API uses AT command `AT+CIPSTART` in `esp82xx_lib.c` to create TCP connection and communicate with ThingSpeak via GET request   
      
-<img src="images/at_cipstart.png" alt="ESP8266 AT Instructions" title="ESP8266 AT Instructions">            
+<img src="images/at_cipstart.png" alt="ESP8266 AT Instructions" title="ESP8266 AT Instructions">      
+      
+Replace the `WRITE_API_KEY` macro in `main.c` with your _Wrtie API Key_ from ThingSpeak and Build/Run the project on to your board, and open Serial capture tool _RealTerm_ for Windows or _SerialTools_ for MacOS to get debug output.                   
      
 You can make following _API Requests_    
      
@@ -26,7 +34,28 @@ You can make following _API Requests_
 `GET https://api.thingspeak.com/channels/<YOUR_CHANNEL_ID>/fields/1.json?api_key=<YOUR_READ_API_KEY_HERE>&results=2`    
      
 **Read Channel Status Updates**   
-`GET https://api.thingspeak.com/channels/<YOUR_CHANNEL_ID>/status.json?api_key=<YOUR_READ_API_KEY_HERE>`           
+`GET https://api.thingspeak.com/channels/<YOUR_CHANNEL_ID>/status.json?api_key=<YOUR_READ_API_KEY_HERE>`     
+     
+     
+## Other application examples uses ThingSpeak     
+     
+- [Collect and analyze energy data](https://www.mathworks.com/company/user_stories/cadmus-collects-and-analyzes-energy-data-in-near-real-time-using-matlab-and-the-thingSpeak-internet-of-things-platform.html?s_eid=EML_15480)          
+     
+- [Building the Internet of Things with the ESP8266 Wi-Fi Module and ThingSpeak](https://www.mathworks.com/esp8266?s_eid=EML_15480)         
+     
+- [Analyze data from a weather station](https://makerzone.mathworks.com/stories/arduino-stories/weather-station-analysis-revisited/?s_eid=EML_15480)       
+     
+- [Forecast wind-driven tide levels with an ultrasonic tide gage](Forecast wind-driven tide levels with an ultrasonic tide gage)      
+        
+        
+## Resources to get started    
+     
+- [Documentation](https://www.mathworks.com/help/thingspeak/?s_eid=EML_15480)       
+     
+- [Examples](https://www.mathworks.com/help/thingspeak/examples.html?s_eid=EML_15480)                                   
+                        
+                      
+                     
             
         
           
