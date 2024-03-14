@@ -3,7 +3,6 @@
 #include "esp82xx_driver.h"
 #include "circular_buffer.h"
 #include "esp82xx_lib.h"
-#include "hardware_modules.h"
 #include "adc.h"
 
 #define SSID_NAME                 "__hw_wifi__"
@@ -22,12 +21,6 @@ int main()
 	// RS pin is connected to PA8 instead of 3.3v
 	esp_rs_pin_init();
 	esp_rs_pin_enable();
-
-	// Initialise hardware modules
-	light_init();
-	valve_init();
-	pump_init();
-	gripper_init();
 
 	// Initialise ADC
 	pa1_adc_init();
